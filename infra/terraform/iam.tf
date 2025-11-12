@@ -60,6 +60,11 @@ resource "aws_iam_role_policy" "github_oidc" {
         ]
       },
       {
+        Effect   = "Allow"
+        Action   = ["ecr:GetAuthorizationToken"]
+        Resource = "*"
+      },
+      {
         Effect = "Allow"
         Action = [
           "ecs:DescribeServices",
