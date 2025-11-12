@@ -1,4 +1,5 @@
 resource "random_id" "backup_bucket_suffix" {
+  count       = var.create_rds_backup_bucket ? 1 : 0
   byte_length = 3
 }
 
@@ -65,7 +66,8 @@ resource "aws_db_instance" "postgres" {
 }
 
 resource "aws_s3_bucket" "rds_backups" {
-  bucket        = "${local.name_prefix}-rds-backups-${random_id.backup_bucket_suffix.hex}"
+  count         = var.create_rds_backup_bucket ? 1 : 0
+  bucket        = "${local.name_prefix}-rds-backups-${random_id.backup_bucket_suffix[0].hex}"
   force_destroy = false
 
   tags = merge(local.common_tags, {
@@ -74,7 +76,8 @@ resource "aws_s3_bucket" "rds_backups" {
 }
 
 resource "aws_s3_bucket_versioning" "rds_backups" {
-  bucket = aws_s3_bucket.rds_backups.id
+  count  = var.create_rds_backup_bucket ? 1 : 0
+  bucket = aws_s3_bucket.rds_backups[0].id
 
   versioning_configuration {
     status = "Enabled"
@@ -82,7 +85,8 @@ resource "aws_s3_bucket_versioning" "rds_backups" {
 }
 
 resource "aws_s3_bucket_server_side_encryption_configuration" "rds_backups" {
-  bucket = aws_s3_bucket.rds_backups.id
+  count  = var.create_rds_backup_bucket ? 1 : 0
+  bucket = aws_s3_bucket.rds_backups[0].id
 
   rule {
     apply_server_side_encryption_by_default {
@@ -92,7 +96,8 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "rds_backups" {
 }
 
 resource "aws_s3_bucket_public_access_block" "rds_backups" {
-  bucket = aws_s3_bucket.rds_backups.id
+  count  = var.create_rds_backup_bucket ? 1 : 0
+  bucket = aws_s3_bucket.rds_backups[0].id
 
   block_public_acls       = true
   block_public_policy     = true
@@ -101,7 +106,8 @@ resource "aws_s3_bucket_public_access_block" "rds_backups" {
 }
 
 resource "aws_s3_bucket_lifecycle_configuration" "rds_backups" {
-  bucket = aws_s3_bucket.rds_backups.id
+  count  = var.create_rds_backup_bucket ? 1 : 0
+  bucket = aws_s3_bucket.rds_backups[0].id
 
   rule {
     id     = "expire-old-dumps"
@@ -116,4 +122,8 @@ resource "aws_s3_bucket_lifecycle_configuration" "rds_backups" {
       noncurrent_days = 30
     }
   }
+}
+
+locals {
+  rds_backup_bucket_name = var.create_rds_backup_bucket ? aws_s3_bucket.rds_backups[0].bucket : var.external_rds_backup_bucket_name
 }

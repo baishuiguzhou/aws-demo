@@ -13,7 +13,9 @@
 | `security.tf` | 定义 ALB 与 ECS 任务的安全组，限制入口来源并仅允许 ALB 访问容器端口。 |
 | `alb.tf` | **Step 3**：创建公网 ALB、Target Group 及 HTTP Listener，为 ECS 服务提供入口流量。 |
 | `ecs.tf` | **Step 3**：创建 ECS Cluster、任务执行/Task IAM 角色、CloudWatch Log Group、Fargate Task Definition、Service 以及 17:00–17:59 JST 的定时扩缩容。 |
-| `rds.tf` | **Step 4（进行中）**：创建 PostgreSQL RDS（私网、多日志导出）、专用安全组、子网组，以及存放 `pg_dump` 的 S3 Bucket（默认 30 天生命周期）。 |
+| `rds.tf` | **Step 4**：创建 PostgreSQL RDS（私网、多日志导出）、专用安全组、子网组；S3 备份桶可由 Terraform 创建（开启版本管理/加密/生命周期）或通过 `external_rds_backup_bucket_name` 指向手工桶。 |
+| `alerts.tf` | 定义 SNS Topic 及邮箱订阅，用于部署成功/失败、备份失败等场景的邮件通知。 |
+| `backup.tf` | **Step 5**：ECS Fargate pg_dump 备份任务（自带 CloudWatch Logs、S3 上传、IAM 权限）、EventBridge 定时/失败检测规则，以及失败告警到 SNS。 |
 | `outputs.tf` | 汇总 VPC ID、子网 ID、NAT IDs、Flow Log Group、ECR 仓库名称/URI 等输出，供后续模块引用或文档使用。 |
 | `.terraform.lock.hcl` | Provider 锁文件，确保团队使用一致版本。 |
 

@@ -85,5 +85,5 @@ output "rds_security_group_id" {
 
 output "rds_backup_bucket_name" {
   description = "S3 bucket receiving pg_dump backups"
-  value       = aws_s3_bucket.rds_backups.bucket
+  value       = local.rds_backup_bucket_name
 }

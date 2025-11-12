@@ -94,6 +94,36 @@ variable "app_log_retention_days" {
   default     = 30
 }
 
+variable "alert_emails" {
+  description = "Email addresses subscribed to SNS alerts (deploy, backup failures, etc.)"
+  type        = list(string)
+  default     = []
+}
+
+variable "backup_task_image" {
+  description = "Container image that includes pg_dump and awscli for database backups"
+  type        = string
+  default     = "public.ecr.aws/docker/library/postgres:16"
+}
+
+variable "backup_task_cpu" {
+  description = "Fargate CPU units for the backup task"
+  type        = number
+  default     = 256
+}
+
+variable "backup_task_memory" {
+  description = "Fargate memory (MiB) for the backup task"
+  type        = number
+  default     = 512
+}
+
+variable "backup_schedule_cron" {
+  description = "EventBridge cron expression (UTC) for daily pg_dump backups"
+  type        = string
+  default     = "cron(0 15 * * ? *)" # 00:00 JST
+}
+
 variable "db_instance_class" {
   description = "RDS PostgreSQL instance class (e.g., db.t4g.micro)"
   type        = string
@@ -129,4 +159,16 @@ variable "db_backup_retention_days" {
   description = "Number of days to retain automated RDS backups"
   type        = number
   default     = 7
+}
+
+variable "create_rds_backup_bucket" {
+  description = "Whether Terraform should create/manage the RDS backup S3 bucket"
+  type        = bool
+  default     = false
+}
+
+variable "external_rds_backup_bucket_name" {
+  description = "Existing S3 bucket name to hold pg_dump backups when Terraform is not creating one"
+  type        = string
+  default     = ""
 }
