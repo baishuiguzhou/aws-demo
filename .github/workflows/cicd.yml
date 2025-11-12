@@ -42,6 +42,10 @@ jobs:
         run: composer install --no-interaction --prefer-dist --optimize-autoloader
         working-directory: src
 
+      - name: Prepare env file
+        run: cp .env.example .env
+        working-directory: src
+
       - name: Generate app key
         run: php artisan key:generate
         working-directory: src
