@@ -4,7 +4,7 @@ FROM public.ecr.aws/docker/library/composer:2 AS vendor
 WORKDIR /app
 
 COPY src/composer.json src/composer.lock ./
-RUN composer install --no-dev --no-interaction --prefer-dist
+RUN composer install --no-dev --no-interaction --prefer-dist --no-scripts
 
 COPY src .
 RUN composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
