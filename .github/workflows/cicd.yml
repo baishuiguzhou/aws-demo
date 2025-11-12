@@ -1,0 +1,109 @@
+name: Build & Deploy Laravel
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  AWS_REGION: ap-northeast-1
+  ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
+  ECS_CLUSTER_NAME: ${{ secrets.ECS_CLUSTER_NAME }}
+  ECS_SERVICE_NAME: ${{ secrets.ECS_SERVICE_NAME }}
+  SNS_TOPIC_ARN: ${{ secrets.SNS_TOPIC_ARN }}
+
+jobs:
+  test-build-release:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: mbstring, intl, dom, pdo_pgsql, bcmath
+          tools: composer
+
+      - name: Cache composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: src/vendor
+          key: composer-${{ runner.os }}-${{ hashFiles('src/composer.lock') }}
+          restore-keys: |
+            composer-${{ runner.os }}-
+
+      - name: Install PHP dependencies
+        run: composer install --no-interaction --prefer-dist --optimize-autoloader
+        working-directory: src
+
+      - name: Run PHPUnit
+        run: php artisan test
+        working-directory: src
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_OIDC_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Derive build metadata
+        id: meta
+        run: |
+          SHORT_SHA="${GITHUB_SHA::7}"
+          echo "image_tag=$SHORT_SHA" >> "$GITHUB_OUTPUT"
+          echo "release_tag=$(date +%Y.%m.%d)-$SHORT_SHA" >> "$GITHUB_OUTPUT"
+
+      - name: Build and push Docker image
+        id: push-image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        run: |
+          IMAGE="$ECR_REGISTRY/$ECR_REPOSITORY:${{ steps.meta.outputs.image_tag }}"
+          LATEST="$ECR_REGISTRY/$ECR_REPOSITORY:latest"
+          docker build -t "$IMAGE" -t "$LATEST" .
+          docker push "$IMAGE"
+          docker push "$LATEST"
+          echo "image=$IMAGE" >> "$GITHUB_OUTPUT"
+
+      - name: Force ECS deployment
+        run: |
+          aws ecs update-service \
+            --cluster "$ECS_CLUSTER_NAME" \
+            --service "$ECS_SERVICE_NAME" \
+            --force-new-deployment
+
+      - name: Create GitHub release
+        if: github.ref == 'refs/heads/main'
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.meta.outputs.release_tag }}
+          name: Release ${{ steps.meta.outputs.release_tag }}
+          body: |
+            - Image: `${{ steps.push-image.outputs.image }}`
+            - Commit: ${{ github.sha }}
+
+      - name: Notify success
+        if: success()
+        run: |
+          aws sns publish \
+            --topic-arn "$SNS_TOPIC_ARN" \
+            --subject "CI/CD succeeded" \
+            --message "Image: ${{ steps.push-image.outputs.image }} deployed to $ECS_SERVICE_NAME"
+
+      - name: Notify failure
+        if: failure()
+        run: |
+          aws sns publish \
+            --topic-arn "$SNS_TOPIC_ARN" \
+            --subject "CI/CD failed" \
+            --message "Workflow ${{ github.workflow }} failed for commit ${{ github.sha }}"

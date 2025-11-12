@@ -1,0 +1,26 @@
+# syntax=docker/dockerfile:1.7
+
+FROM public.ecr.aws/docker/library/composer:2 AS vendor
+WORKDIR /app
+
+COPY src/composer.json src/composer.lock ./
+RUN composer install --no-dev --no-interaction --prefer-dist
+
+COPY src .
+RUN composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
+
+FROM public.ecr.aws/docker/library/php:8.4-cli AS runtime
+WORKDIR /var/www/html
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends libpq-dev unzip git \
+    && docker-php-ext-install pdo pdo_pgsql \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --from=vendor /app /var/www/html
+
+RUN mkdir -p /run/php && chown -R www-data:www-data /var/www/html /run/php
+
+EXPOSE 80
+
+CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=80"]

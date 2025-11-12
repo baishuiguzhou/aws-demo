@@ -124,6 +124,18 @@ variable "backup_schedule_cron" {
   default     = "cron(0 15 * * ? *)" # 00:00 JST
 }
 
+variable "github_owner" {
+  description = "GitHub organization or user that owns the repository"
+  type        = string
+  default     = "baishuiguzhou"
+}
+
+variable "github_repo" {
+  description = "Repository name used for GitHub Actions OIDC trust"
+  type        = string
+  default     = "aws-demo"
+}
+
 variable "db_instance_class" {
   description = "RDS PostgreSQL instance class (e.g., db.t4g.micro)"
   type        = string

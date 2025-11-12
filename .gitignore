@@ -38,3 +38,4 @@ Thumbs.db
 infra/terraform/terraform.tfstate
 infra/terraform/terraform.tfstate.backup
 infra/terraform/terraform.tfvars
+infra/terraform/appconfig_sync.zip

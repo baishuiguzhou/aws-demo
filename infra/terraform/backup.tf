@@ -194,12 +194,12 @@ resource "aws_cloudwatch_event_rule" "db_backup_failures" {
     "detail-type" : ["ECS Task State Change"],
     "detail" : {
       "clusterArn" : [aws_ecs_cluster.main.arn],
-      "taskDefinitionArn" : [aws_ecs_task_definition.db_backup.arn],
       "lastStatus" : ["STOPPED"],
       "containers" : {
+        "name" : ["db-backup"],
         "exitCode" : [
           {
-            "numeric" : [">", 0]
+            "numeric" : [">", 1]
           }
         ]
       }

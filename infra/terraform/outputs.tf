@@ -87,3 +87,33 @@ output "rds_backup_bucket_name" {
   description = "S3 bucket receiving pg_dump backups"
   value       = local.rds_backup_bucket_name
 }
+
+output "appconfig_application_id" {
+  description = "AppConfig application identifier"
+  value       = aws_appconfig_application.main.id
+}
+
+output "appconfig_environment_id" {
+  description = "AppConfig environment identifier"
+  value       = aws_appconfig_environment.main.environment_id
+}
+
+output "appconfig_configuration_profile_id" {
+  description = "AppConfig configuration profile identifier"
+  value       = aws_appconfig_configuration_profile.main.configuration_profile_id
+}
+
+output "appconfig_lambda_name" {
+  description = "Lambda handling AppConfig deployment events"
+  value       = aws_lambda_function.appconfig_sync.function_name
+}
+
+output "alerts_topic_arn" {
+  description = "SNS topic used for operational notifications"
+  value       = aws_sns_topic.alerts.arn
+}
+
+output "github_actions_role_arn" {
+  description = "IAM role ARN assumed by GitHub Actions via OIDC"
+  value       = aws_iam_role.github_oidc.arn
+}

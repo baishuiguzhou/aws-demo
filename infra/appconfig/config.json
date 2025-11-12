@@ -1,0 +1,5 @@
+﻿{
+  "feature_message": "Hello from AppConfig",
+  "maintenance_mode": false,
+  "homepage_env": "POPER_MESSAGE"
+}

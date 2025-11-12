@@ -79,14 +79,12 @@ resource "aws_ecs_task_definition" "app" {
         }
       ]
       environment = [
-        {
-          name  = "APP_ENV"
-          value = var.environment
-        },
-        {
-          name  = "APP_NAME"
-          value = var.project_name
-        }
+        { name = "APP_ENV", value = var.environment },
+        { name = "APP_NAME", value = var.project_name },
+        { name = "APPCONFIG_APPLICATION_ID", value = aws_appconfig_application.main.id },
+        { name = "APPCONFIG_ENVIRONMENT_ID", value = aws_appconfig_environment.main.environment_id },
+        { name = "APPCONFIG_CONFIGURATION_PROFILE_ID", value = aws_appconfig_configuration_profile.main.configuration_profile_id },
+        { name = "APPCONFIG_ENDPOINT", value = "http://127.0.0.1:2772/applications/${aws_appconfig_application.main.id}/environments/${aws_appconfig_environment.main.environment_id}/configurations/${aws_appconfig_configuration_profile.main.configuration_profile_id}" }
       ]
       logConfiguration = {
         logDriver = "awslogs"
@@ -94,6 +92,33 @@ resource "aws_ecs_task_definition" "app" {
           awslogs-group         = aws_cloudwatch_log_group.ecs_app.name
           awslogs-region        = var.aws_region
           awslogs-stream-prefix = "app"
+        }
+      }
+    },
+    {
+      name      = "appconfig-agent"
+      image     = "public.ecr.aws/aws-appconfig/aws-appconfig-agent:latest"
+      essential = false
+      portMappings = [
+        {
+          containerPort = 2772
+          hostPort      = 2772
+          protocol      = "tcp"
+        }
+      ]
+      environment = [
+        { name = "AWS_REGION", value = var.aws_region },
+        { name = "AWS_APPCONFIG_APPLICATION_ID", value = aws_appconfig_application.main.id },
+        { name = "AWS_APPCONFIG_ENVIRONMENT_ID", value = aws_appconfig_environment.main.environment_id },
+        { name = "AWS_APPCONFIG_CONFIGURATION_PROFILE_ID", value = aws_appconfig_configuration_profile.main.configuration_profile_id },
+        { name = "AWS_APPCONFIG_POLL_INTERVAL_SECONDS", value = "30" }
+      ]
+      logConfiguration = {
+        logDriver = "awslogs"
+        options = {
+          awslogs-group         = aws_cloudwatch_log_group.ecs_app.name
+          awslogs-region        = var.aws_region
+          awslogs-stream-prefix = "appconfig-agent"
         }
       }
     }

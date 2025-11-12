@@ -13,3 +13,32 @@ resource "aws_sns_topic_subscription" "alerts_email" {
   protocol  = "email"
   endpoint  = each.value
 }
+
+data "aws_iam_policy_document" "sns_alerts" {
+  statement {
+    sid     = "AllowOwnerPublish"
+    effect  = "Allow"
+    actions = ["sns:Publish"]
+    principals {
+      type        = "AWS"
+      identifiers = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"]
+    }
+    resources = [aws_sns_topic.alerts.arn]
+  }
+
+  statement {
+    sid     = "AllowEventBridgePublish"
+    effect  = "Allow"
+    actions = ["sns:Publish"]
+    principals {
+      type        = "Service"
+      identifiers = ["events.amazonaws.com"]
+    }
+    resources = [aws_sns_topic.alerts.arn]
+  }
+}
+
+resource "aws_sns_topic_policy" "alerts" {
+  arn    = aws_sns_topic.alerts.arn
+  policy = data.aws_iam_policy_document.sns_alerts.json
+}

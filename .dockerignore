@@ -1,0 +1,13 @@
+.git
+.github
+.docker
+infra
+appconfig
+docker-compose.local.yml
+README.md
+*.md
+*.log
+src/storage
+src/vendor
+src/node_modules
+infra/terraform
