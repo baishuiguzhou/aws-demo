@@ -90,7 +90,6 @@ jobs:
             --cluster "$ECS_CLUSTER_NAME" \
             --service "$ECS_SERVICE_NAME" \
             --force-new-deployment
-
       - name: Create GitHub release
         if: github.ref == 'refs/heads/main'
         uses: softprops/action-gh-release@v1
