@@ -23,10 +23,6 @@ RUN mkdir -p /run/php \
     && chown -R www-data:www-data /var/www/html /run/php \
     && rm -f /var/www/html/.env
 
-COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
-RUN sed -i 's/\r$//' /usr/local/bin/entrypoint.sh && chmod +x /usr/local/bin/entrypoint.sh
-
 EXPOSE 80
 
-ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
-CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=80"]
+ENTRYPOINT ["/bin/sh", "-c", "php artisan migrate --force || echo 'Migrations failed (continuing)'; exec php artisan serve --host=0.0.0.0 --port=80"]
