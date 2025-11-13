@@ -1,15 +1,17 @@
-# syntax=docker/dockerfile:1.7
+# syntax=registry.aliyuncs.com/docker/dockerfile:1.7
 
-FROM public.ecr.aws/docker/library/composer:2 AS vendor
+
+FROM docker.m.daocloud.io/library/composer:2 AS vendor
 WORKDIR /app
 
 COPY src/composer.json src/composer.lock ./
-RUN composer install --no-dev --no-interaction --prefer-dist --no-scripts
+RUN composer config -g repos.packagist composer https://mirrors.aliyun.com/composer/ \
+    && composer install --no-dev --no-interaction --prefer-dist --no-scripts
 
 COPY src .
 RUN composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
 
-FROM public.ecr.aws/docker/library/php:8.4-cli AS runtime
+FROM docker.m.daocloud.io/library/php:8.4-cli AS runtime
 WORKDIR /var/www/html
 
 RUN apt-get update \
@@ -18,7 +20,6 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 COPY --from=vendor /app /var/www/html
-
 RUN mkdir -p /run/php && chown -R www-data:www-data /var/www/html /run/php && rm -f /var/www/html/.env
 
 EXPOSE 80
