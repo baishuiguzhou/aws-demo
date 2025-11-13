@@ -19,8 +19,14 @@ RUN apt-get update \
 
 COPY --from=vendor /app /var/www/html
 
-RUN mkdir -p /run/php && chown -R www-data:www-data /var/www/html /run/php && rm -f /var/www/html/.env
+COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
+
+RUN mkdir -p /run/php \
+    && chown -R www-data:www-data /var/www/html /run/php \
+    && rm -f /var/www/html/.env \
+    && chmod +x /usr/local/bin/entrypoint.sh
 
 EXPOSE 80
 
+ENTRYPOINT ["entrypoint.sh"]
 CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=80"]
