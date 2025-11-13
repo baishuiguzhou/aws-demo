@@ -35,9 +35,9 @@ variable "flow_logs_retention_days" {
 }
 
 variable "app_image" {
-  description = "Container image URI for the Laravel application"
+  description = "Container image URI for the Laravel application (leave blank to use ECR latest)"
   type        = string
-  default     = "public.ecr.aws/docker/library/nginx:latest"
+  default     = ""
 }
 
 variable "container_port" {
@@ -92,6 +92,13 @@ variable "app_log_retention_days" {
   description = "Retention in days for ECS application CloudWatch logs"
   type        = number
   default     = 30
+}
+
+variable "app_key" {
+  description = "Laravel APP_KEY injected into the container"
+  type        = string
+  sensitive   = true
+  default     = ""
 }
 
 variable "alert_emails" {

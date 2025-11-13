@@ -6,6 +6,8 @@ locals {
     Environment = var.environment
   }
 
+  app_image_uri = var.app_image != "" ? var.app_image : "${aws_ecr_repository.app.repository_url}:latest"
+
   selected_azs = slice(
     data.aws_availability_zones.available.names,
     0,

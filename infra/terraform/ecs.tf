@@ -69,7 +69,7 @@ resource "aws_ecs_task_definition" "app" {
   container_definitions = jsonencode([
     {
       name      = "app"
-      image     = var.app_image
+      image     = local.app_image_uri
       essential = true
       portMappings = [
         {
@@ -81,6 +81,8 @@ resource "aws_ecs_task_definition" "app" {
       environment = [
         { name = "APP_ENV", value = var.environment },
         { name = "APP_NAME", value = var.project_name },
+        { name = "APP_KEY", value = var.app_key },
+        { name = "APP_KEY", value = var.app_key },
         { name = "APPCONFIG_APPLICATION_ID", value = aws_appconfig_application.main.id },
         { name = "APPCONFIG_ENVIRONMENT_ID", value = aws_appconfig_environment.main.environment_id },
         { name = "APPCONFIG_CONFIGURATION_PROFILE_ID", value = aws_appconfig_configuration_profile.main.configuration_profile_id },
