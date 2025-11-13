@@ -20,6 +20,11 @@
         @endif
     </head>
     <body class="bg-[#FDFDFC] dark:bg-[#0a0a0a] text-[#1b1b18] flex p-6 lg:p-8 items-center lg:justify-center min-h-screen flex-col">
+        <div class="w-full max-w-4xl border border-dashed border-red-400 rounded-2xl p-6 mb-8 text-center bg-white/80 dark:bg-black/40">
+            <p class="text-sm uppercase tracking-wide text-gray-500 dark:text-gray-300">POPER_MESSAGE</p>
+            <p class="text-3xl font-bold text-red-600 mt-2">{{ $poperMessage }}</p>
+            <p class="text-xs text-gray-600 dark:text-gray-400 mt-3">该值来自运行时环境变量 / AppConfig，证明镜像已切换为 Laravel 应用。</p>
+        </div>
         <header class="w-full lg:max-w-4xl max-w-[335px] text-sm mb-6 not-has-[nav]:hidden">
             @if (Route::has('login'))
                 <nav class="flex items-center justify-end gap-4">
