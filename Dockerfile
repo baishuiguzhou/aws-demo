@@ -21,7 +21,9 @@ COPY --from=vendor /app /var/www/html
 
 RUN mkdir -p /run/php \
     && chown -R www-data:www-data /var/www/html /run/php \
-    && rm -f /var/www/html/.env
+    && rm -f /var/www/html/.env \
+    && mkdir -p storage/framework/cache/data storage/framework/views storage/logs bootstrap/cache \
+    && chown -R www-data:www-data storage bootstrap/cache
 
 EXPOSE 80
 
