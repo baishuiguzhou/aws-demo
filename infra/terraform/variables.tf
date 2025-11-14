@@ -110,7 +110,7 @@ variable "alert_emails" {
 variable "backup_task_image" {
   description = "Container image that includes pg_dump and awscli for database backups"
   type        = string
-  default     = "public.ecr.aws/docker/library/postgres:16"
+  default     = "public.ecr.aws/docker/library/postgres:17"
 }
 
 variable "backup_task_cpu" {
