@@ -35,4 +35,8 @@ return [
         ],
     ],
 
+    'appconfig' => [
+        'endpoint' => env('APPCONFIG_ENDPOINT'),
+    ],
+
 ];
