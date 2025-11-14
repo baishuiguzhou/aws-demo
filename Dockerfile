@@ -27,4 +27,4 @@ RUN mkdir -p /run/php \
 
 EXPOSE 80
 
-ENTRYPOINT ["/bin/sh", "-c", "php artisan migrate --force || echo 'Migrations failed (continuing)'; exec php artisan serve --host=0.0.0.0 --port=80"]
+ENTRYPOINT ["php", "artisan", "serve", "--host=0.0.0.0", "--port=80"]
