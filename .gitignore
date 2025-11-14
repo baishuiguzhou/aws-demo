@@ -31,6 +31,9 @@ src/.phpunit.result.cache
 Homestead.json
 Homestead.yaml
 Thumbs.db
+src/.env
+src/.env.*
+.docker/postgres-data/
 
 # Terraform state
 *.tfstate
